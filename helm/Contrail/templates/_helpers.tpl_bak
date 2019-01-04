@@ -1,0 +1,10 @@
+{{- define "nodes" -}}
+{{- $nameSpace := .global.namespace }}
+{{- $value := index . 0 }}
+{{- $nodeType := index . 0 }}
+{{- $nodeCount := .nodeCount | int }}
+  {{- range $index0 := until $nodeCount -}}
+    {{- $index1 := $index0 | add1 -}}
+contrailanalytics-{{ $index0 }}.contrailanalytics-svc.{{ $nameSpace }}.svc.cluster.local{{ if ne $index1 $nodeCount }},{{ end }}
+  {{- end -}}
+{{- end -}}

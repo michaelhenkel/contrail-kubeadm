@@ -1,0 +1,5 @@
+global:
+  namespace: "contrail"
+  nodeCount: 3
+  containerRegistry: "docker.io/michaelhenkel"
+  containerTag: "5.1-dev5"

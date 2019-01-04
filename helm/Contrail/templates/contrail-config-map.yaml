@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrail-config-map
+  namespace: {{ .Values.global.namespace }}
+data:
+  RABBITMQ_NODE_PORT: "5673"
+  CONFIGDB_PORT: "9160"
+  CONFIGDB_CQL_PORT: "9042"
+  CASSANDRA_CQL_PORT: "9042"
+  CASSANDRA_JMX_LOCAL_PORT: "7199"
+  CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
+  ANALYTICSDB_PORT: "9160"
+  ANALYTICSDB_CQL_PORT: "9042"
+  ZOOKEEPER_ANALYTICS_PORT: "2181"
+  CLOUD_ORCHESTRATOR: "kubernetes"
+  CONTRAIL_CONTAINER_REGISTRY: {{ .Values.global.containerRegistry }}
+  CONTRAIL_CONTAINER_TAG: {{ .Values.global.containerTag }}
+  KUBERNETES_IP_FABRIC_FORWARDING: "true"
+  KUBERNETES_IP_FABRIC_SNAT: "true"

@@ -1,0 +1,56 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: zookeeper
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: zookeeper
+spec:
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoExecute
+      hostNetwork: true
+      serviceAccountName: contrail-service-account
+      initContainers:
+      - name: contrail-k8s-init
+        image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
+        command: ["/contrail-k8s-init"]
+        imagePullPolicy: "Always"
+      containers:
+      - name: zookeeper
+        image: "{{ .Values.global.containerRegistry }}/contrail-external-zookeeper:{{ .Values.global.containerTag }}"
+        imagePullPolicy: ""
+        env:
+        - name: ZOOKEEPER_PORT
+          value: "2181"
+        - name: ZOOKEEPER_PORTS
+          value: "2888:3888"
+        - name: NODE_TYPE
+          value: config-database
+        - name: ZOOKEEPER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/lib/zookeeper
+          name: zookeeper-data
+        - mountPath: /var/log/zookeeper
+          name: zookeeper-logs
+      volumes:
+      - name: zookeeper-data
+        hostPath:
+          path: /var/lib/contrail/zookeeper
+      - name: zookeeper-logs
+        hostPath:
+          path: /var/log/contrail/zookeeper

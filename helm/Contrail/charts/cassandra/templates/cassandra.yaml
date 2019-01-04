@@ -1,0 +1,99 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cassandra-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  CASSANDRA_CLUSTER_NAME: ContrailConfigDB
+  CASSANDRA_START_RPC: "true"
+  CASSANDRA_LISTEN_ADDRESS: auto
+  CASSANDRA_PORT: "9160"
+  CASSANDRA_CQL_PORT: "9042"
+  CASSANDRA_SSL_STORAGE_PORT: "7001"
+  CASSANDRA_STORAGE_PORT: "7000"
+  CASSANDRA_JMX_LOCAL_PORT: "7199"
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: cassandra
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: cassandra
+spec:
+  template:
+    metadata:
+      labels:
+        app: cassandra
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoExecute
+      hostNetwork: true
+      serviceAccountName: contrail-service-account
+      initContainers:
+      - name: contrail-k8s-init
+        image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
+        command: ["/contrail-k8s-init"]
+        imagePullPolicy: "Always"
+      containers:
+#      - name: nodemgr
+#        image: "{{ .Values.global.containerRegistry }}/contrail-nodemgr:{{ .Values.global.containerTag }}"
+#        imagePullPolicy: "Always"
+#        envFrom:
+#        - configMapRef:
+#            name: contrail-config-map
+#        env:
+#        - name: NODE_TYPE
+#          value: database
+#        - name: DATABASE_NODEMGR__DEFAULTS__minimum_diskGB
+#          value: "2"
+#        - name: DOCKER_HOST
+#          value: "unix://mnt/docker.sock"
+#        - name: CONTROLLER_NODES
+#          valueFrom:
+#            configMapKeyRef:
+#              name: contrailcontrollernodes
+#              key: CONTROLLER_NODES
+#        volumeMounts:
+#        - mountPath: /var/log/contrail
+#          name: configdb-logs
+#        - mountPath: /mnt
+#          name: docker-unix-socket
+      - name: cassandra
+        image: "{{ .Values.global.containerRegistry }}/contrail-external-cassandra:{{ .Values.global.containerTag }}"
+        imagePullPolicy: ""
+        env:
+        - name: NODE_TYPE
+          value: config-database
+        - name: CASSANDRA_SEEDS
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: CONTROLLER_NODES
+        envFrom:
+        - configMapRef:
+            name: cassandra-config
+        volumeMounts:
+        - mountPath: /var/lib/cassandra
+          name: configdb-data
+        - mountPath: /var/log/cassandra
+          name: configdb-logs
+      volumes:
+      - name: configdb-data
+        hostPath:
+          path: /var/lib/contrail/configdb
+      - name: configdb-logs
+        hostPath:
+          path: /var/log/contrail/configdb
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin

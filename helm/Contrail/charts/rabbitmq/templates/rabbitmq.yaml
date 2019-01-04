@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  RABBITMQ_ERLANG_COOKIE: "47EFF3BB-4786-46E0-A5BB-58455B3C2CB4"
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: rabbitmq
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: rabbitmq
+spec:
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoExecute
+      hostNetwork: true
+      serviceAccountName: contrail-service-account
+      initContainers:
+      - name: contrail-k8s-init
+        image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
+        command: ["/contrail-k8s-init"]
+        imagePullPolicy: "Always"
+      containers:
+      - name: rabbitmq
+        image: "{{ .Values.global.containerRegistry }}/contrail-external-rabbitmq:{{ .Values.global.containerTag }}"
+        imagePullPolicy: ""
+        env:
+        - name: NODE_TYPE
+          value: config-database
+        - name: RABBITMQ_NODE_PORT
+          value: "5673"
+        - name: RABBITMQ_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: CONTROLLER_NODES
+        envFrom:
+        - configMapRef:
+            name: rabbitmq-config
+        volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq-data
+        - mountPath: /var/log/rabbitmq
+          name: rabbitmq-logs
+      volumes:
+      - name: rabbitmq-data
+        hostPath:
+          path: /var/lib/contrail/rabbitmq
+      - name: rabbitmq-logs
+        hostPath:
+          path: /var/log/contrail/rabbitmq

@@ -1,0 +1,53 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: redis
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: redis
+spec:
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoExecute
+      hostNetwork: true
+      serviceAccountName: contrail-service-account
+      initContainers:
+      - name: contrail-k8s-init
+        image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
+        command: ["/contrail-k8s-init"]
+        imagePullPolicy: "Always"
+      containers:
+      - name: redis
+        image: "{{ .Values.global.containerRegistry }}/contrail-external-redis:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "Always"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/lib/redis
+          name: redis-data
+        - mountPath: /var/log/redis
+          name: redis-logs
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /var/lib/contrail/redis
+      - name: redis-logs
+        hostPath:
+          path: /var/log/contrail/redis

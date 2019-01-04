@@ -1,0 +1,110 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contrail-kube-manager-token
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    kubernetes.io/service-account.name: contrail-service-account
+type: kubernetes.io/service-account-token
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-manager-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kube-manager
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: contrail-kube-manager
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-kube-manager
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoExecute
+      hostNetwork: true
+      serviceAccountName: contrail-service-account
+      initContainers:
+      - name: contrail-k8s-init
+        image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
+        command: ["/contrail-k8s-init"]
+        imagePullPolicy: "Always"
+      - name: wait-for-api
+        image: busybox
+        command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
+        env:
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: CONTROLLER_NODES
+      - name: contrail-node-init
+        image: "{{ .Values.global.containerRegistry }}/contrail-node-init:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "Always"
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ .Values.global.containerRegistry }}/contrail-status:{{ .Values.global.containerTag }}"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+      containers:
+      - name: kube-manager
+        image: "{{ .Values.global.containerRegistry }}/contrail-kubernetes-kube-manager:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "Always"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        - configMapRef:
+            name: kube-manager-config
+        env:
+        - name: LOG_LEVEL
+          value: "SYS_DEBUG"
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: CONTROLLER_NODES
+        - name: KUBERNETES_API_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: KUBERNETES_API_SERVER
+        - name: KUBERNETES_API_SECURE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodes
+              key: KUBERNETES_API_SECURE_PORT
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: kube-manager-logs
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
+      volumes:
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token
+      - name: kube-manager-logs
+        hostPath:
+          path: /var/log/contrail/kube-manager
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
