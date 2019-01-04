@@ -1066,15 +1066,6 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
-#      - name: wait-for-api
-#        image: busybox
-#        command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
-#        env:
-#        - name: CONTROLLER_NODES
-#          valueFrom:
-#            configMapKeyRef:
-#              name: contrailcontrollernodes
-#              key: CONTROLLER_NODES
       - name: contrail-node-init
         image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
         imagePullPolicy: "Always"
