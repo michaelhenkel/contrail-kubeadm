@@ -12,7 +12,7 @@ kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubead
 OpenContrail uses a profiling technique to inject configuration parameters into services.    
 This allows to create cluster wide and per node configurations.    
 The configmap name and label value have to match.    
-### Cluster wide example
+### Cluster wide configuration
 1. Create namespace
 ```
 kubectl create namespace contrail
@@ -36,7 +36,7 @@ done
 ```
 kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubeadm/master/contrail.yaml
 ```
-### Per Node example
+### Per Node configuration
 1. Create namespace
 ```
 kubectl create namespace contrail
