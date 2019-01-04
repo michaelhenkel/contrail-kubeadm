@@ -423,6 +423,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -443,6 +447,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -458,6 +466,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -473,6 +485,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -488,6 +504,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -505,6 +525,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: NODE_TYPE
           value: config
         - name: DOCKER_HOST
@@ -568,6 +592,10 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodes
               key: CONTROLLER_NODES
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: contrail-node-init
         image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
         imagePullPolicy: "Always"
@@ -576,6 +604,10 @@ spec:
         env:
         - name: CONTRAIL_STATUS_IMAGE
           value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -590,6 +622,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -605,6 +641,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -620,6 +660,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -635,6 +679,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -650,6 +698,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -665,6 +717,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -680,6 +736,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -738,6 +798,10 @@ spec:
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -749,6 +813,10 @@ spec:
         securityContext:
           privileged: true
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
           value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
         envFrom:
@@ -765,6 +833,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -780,6 +852,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -877,6 +953,10 @@ spec:
         securityContext:
           privileged: true
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
           value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
         volumeMounts:
@@ -890,6 +970,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -905,6 +989,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -971,6 +1059,10 @@ spec:
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -982,6 +1074,10 @@ spec:
         securityContext:
           privileged: true
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
           value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
         envFrom:
@@ -1000,6 +1096,10 @@ spec:
         - configMapRef:
             name: kube-manager-config
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: LOG_LEVEL
           value: "SYS_DEBUG"
         - name: CONTROLLER_NODES
@@ -1073,6 +1173,10 @@ spec:
         securityContext:
           privileged: true
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
           value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
         envFrom:
@@ -1090,6 +1194,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -1118,6 +1226,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -1141,6 +1253,10 @@ spec:
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -1153,6 +1269,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -1179,6 +1299,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -1214,6 +1338,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: DOCKER_HOST
           value: "unix://mnt/docker.sock"
         - name: CONTROLLER_NODES

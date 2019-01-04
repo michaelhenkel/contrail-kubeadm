@@ -1,7 +1,7 @@
 # contrail-kubeadm
 Installing OpenContrail on a kubeadm installed Kubernetes cluster    
 ## Prerequisites
-- Kubernetes v1.13 or later
+- Kubernetes v1.13.1 or later (might work on other versions, but not tested)
 - Kubernetes cluster installed with kubeadm
 - Kubernetes node names resolvable via DNS or /etc/hosts
 ## Simple installation 

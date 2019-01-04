@@ -31,6 +31,10 @@ spec:
         securityContext:
           privileged: true
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
           value: "{{ .Values.global.containerRegistry }}/contrail-status:{{ .Values.global.containerTag }}"
         volumeMounts:
@@ -44,6 +48,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
@@ -59,6 +67,10 @@ spec:
         - configMapRef:
             name: contrail-config-map
         env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
