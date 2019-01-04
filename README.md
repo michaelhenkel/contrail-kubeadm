@@ -124,3 +124,39 @@ OpenContrail service execute a go binary which
 
 #### go code for profile matching
 https://github.com/michaelhenkel/contrail-k8s-node-profile    
+
+## Kubernetes cluster installation information
+The above is tested on a Kubernetes cluster with the following configuration:    
+### Init first master
+```
+[root@kvm1 ~]# cat /etc/kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: InitConfiguration
+nodeRegistration:
+  name: "kvm1-eth2.local"
+localAPIEndpoint:
+  advertiseAddress: "192.168.2.100"
+  bindPort: 16443
+---
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: ClusterConfiguration
+kubernetesVersion: "v1.13.1"
+apiServer:
+  certSANs:
+  - "master.local"
+controlPlaneEndpoint: "master.local:6443"
+networking:
+  dnsDomain: cluster.local
+  podSubnet: "10.32.0.0/12"
+  serviceSubnet: "10.96.0.0/12"
+
+[root@kvm1 ~]# kubeadm init --config=/etc/kubeadm-config.yaml
+```
+### Join subsequent masters
+```
+[root@kvm2 ~]# kubeadm join master.local:6443 --node-name kvm2-eth2.local --apiserver-advertise-address 192.168.2.101 --apiserver-bind-port 16443 --token $JOIN_TOKEN --discovery-token-unsafe-skip-ca-verification --experimental-control-plane
+```
+### Join Nodes
+```
+[root@kvm4 ~]# kubeadm join --node-name kvm4-eth2.local --token $JOIN_TOKEN --discovery-token-unsafe-skip-ca-verification master.local:6443
+```
