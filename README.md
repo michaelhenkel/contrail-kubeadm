@@ -8,6 +8,8 @@ Installing OpenContrail on a kubeadm installed Kubernetes cluster
 ```
 kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubeadm/master/contrail.yaml
 ```
+For a standard installation there is no need for further configuration.    
+Mandatory configuration parameters are derived from the Kubernetes cluster configuration itself.    
 ## Advanced installation
 OpenContrail uses a profiling technique to inject configuration parameters into services.    
 This allows to create cluster wide and per node configurations.    
