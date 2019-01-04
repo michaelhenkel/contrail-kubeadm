@@ -161,3 +161,12 @@ networking:
 ```
 [root@kvm4 ~]# kubeadm join --node-name kvm4-eth2.local --token $JOIN_TOKEN --discovery-token-unsafe-skip-ca-verification master.local:6443
 ```
+### All Nodes
+```
+[root@kvm1 ~]# kubectl get nodes
+NAME              STATUS   ROLES    AGE   VERSION
+kvm1-eth2.local   Ready    master   4d    v1.13.1
+kvm2-eth2.local   Ready    master   4d    v1.13.1
+kvm3-eth2.local   Ready    master   4d    v1.13.1
+kvm4-eth2.local   Ready    <none>   4d    v1.13.1
+```
