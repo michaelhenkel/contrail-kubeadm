@@ -155,6 +155,7 @@ networking:
 ### Join subsequent masters
 ```
 [root@kvm2 ~]# kubeadm join master.local:6443 --node-name kvm2-eth2.local --apiserver-advertise-address 192.168.2.101 --apiserver-bind-port 16443 --token $JOIN_TOKEN --discovery-token-unsafe-skip-ca-verification --experimental-control-plane
+[root@kvm3 ~]# kubeadm join master.local:6443 --node-name kvm3-eth2.local --apiserver-advertise-address 192.168.2.102 --apiserver-bind-port 16443 --token $JOIN_TOKEN --discovery-token-unsafe-skip-ca-verification --experimental-control-plane
 ```
 ### Join Nodes
 ```
