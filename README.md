@@ -87,3 +87,38 @@ kubectl label node kvm4-eth2.local opencontrail.org/profile_leaf1="leaf1.profile
 ```
 kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubeadm/master/contrail.yaml
 ```
+## How it works
+OpenContrail requires a set of mandatory configuration parameters in order to run    
+on a Kubernetes cluster. In addition there are optional parameters which can be used   
+to customize the OpenContrail installation.    
+### Auto configuration of mandatory parameters
+This is the list of required parameters:    
+- CONTROLLER_NODES
+- KUBERNETES_API_SERVER
+- KUBERNETES_API_SECURE_PORT
+- KUBERNETES_POD_SUBNETS
+- KUBERNETES_SERVICE_SUBNETS
+- KUBERNETES_CLUSTER_NAME
+
+Each parameter is known in the Kubernetes cluster prior to the OpenContrail installation.    
+Therefore each OpenContrail runs an init container as part of the daemonset which queries    
+these parameters by talking to the Kubernetes API server.    
+The CONTROLLER_NODES list is retrieved of the master node names.    
+
+#### Example init container in daemonset
+https://github.com/michaelhenkel/contrail-kubeadm/blob/master/contrail.yaml#L415-L419    
+
+#### go code to talk to Kubernetes API
+https://github.com/michaelhenkel/contrail-k8s-init    
+
+### Custom configuration
+In order to customize the configuration, different nodes of a Kubernetes cluster can be    
+labeled with a profile. This profile points to a ConfigMap. The entrypoints of each    
+OpenContrail service execute a go binary which    
+1. Identfies the node the container is running on
+2. Checks if the node has one or more opencontrail/profile_* labels attached
+3. Checks if there is a ConfigMap which matches the label value
+4. Exports the key=value pairs of the ConfigMap(s)
+
+#### go code for profile matching
+https://github.com/michaelhenkel/contrail-k8s-node-profile    
