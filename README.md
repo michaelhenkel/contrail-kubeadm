@@ -78,7 +78,7 @@ cat << EOF > leaf1.profile
 KEY3=value3
 KEY4=value4
 EOF
-kubectl label node kvm4-eth2.local opencontrail.org/profile_leaf1=leaf1.profile
+kubectl create configmap leaf1.profile --from-env-file=./leaf1.profile -n contrail
 ```
 4. Label node with both profiles
 ```
