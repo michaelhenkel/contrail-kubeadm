@@ -108,6 +108,9 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
+      - name: wait-for-vhost0
+        image: busybox
+        command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
 #      - name: nodemgr
 #        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1-dev5"
@@ -202,6 +205,9 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
+      - name: wait-for-vhost0
+        image: busybox
+        command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: rabbitmq
         image: "docker.io/michaelhenkel/contrail-external-rabbitmq:5.1-dev5"
@@ -261,6 +267,9 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
+      - name: wait-for-vhost0
+        image: busybox
+        command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: zookeeper
         image: "docker.io/michaelhenkel/contrail-external-zookeeper:5.1-dev5"
@@ -319,6 +328,9 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
+      - name: wait-for-vhost0
+        image: busybox
+        command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: redis
         image: "docker.io/michaelhenkel/contrail-external-redis:5.1-dev5"
@@ -374,6 +386,9 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
+      - name: wait-for-vhost0
+        image: busybox
+        command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: kafka
         image: "docker.io/michaelhenkel/contrail-external-kafka:5.1-dev5"
@@ -418,6 +433,9 @@ spec:
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
         command: ["/contrail-k8s-init"]
         imagePullPolicy: "Always"
+      - name: wait-for-vhost0
+        image: busybox
+        command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       - name: contrail-node-init
         envFrom:
         - configMapRef:
@@ -878,6 +896,10 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodes
               key: CONTROLLER_NODES
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         securityContext:
           privileged: true
         volumeMounts:
@@ -901,6 +923,10 @@ spec:
           value: control
         - name: DOCKER_HOST
           value: "unix://mnt/docker.sock"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         volumeMounts:
         - mountPath: /var/log/contrail
           name: control-logs

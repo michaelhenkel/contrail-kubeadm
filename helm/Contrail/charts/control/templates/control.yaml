@@ -110,6 +110,10 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodes
               key: CONTROLLER_NODES
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         securityContext:
           privileged: true
         volumeMounts:
@@ -133,6 +137,10 @@ spec:
           value: control
         - name: DOCKER_HOST
           value: "unix://mnt/docker.sock"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         volumeMounts:
         - mountPath: /var/log/contrail
           name: control-logs
