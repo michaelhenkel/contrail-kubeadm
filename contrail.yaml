@@ -81,7 +81,7 @@ data:
   CASSANDRA_STORAGE_PORT: "7000"
   CASSANDRA_JMX_LOCAL_PORT: "7199"
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-cassandra
@@ -187,7 +187,7 @@ metadata:
 data:
   RABBITMQ_ERLANG_COOKIE: "47EFF3BB-4786-46E0-A5BB-58455B3C2CB4"
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-rabbitmq
@@ -258,7 +258,7 @@ spec:
 ---
 # Source: Contrail/charts/zookeeper/templates/zookeeper.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-zookeeper
@@ -328,7 +328,7 @@ spec:
 ---
 # Source: Contrail/charts/redis/templates/redis.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-redis
@@ -395,7 +395,7 @@ spec:
 ---
 # Source: Contrail/charts/kafka/templates/kafka.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-kafka
@@ -451,7 +451,7 @@ spec:
 ---
 # Source: Contrail/charts/config/templates/config.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-controller-config
@@ -628,7 +628,7 @@ spec:
 ---
 # Source: Contrail/charts/analytics/templates/analytics.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-analytics
@@ -848,7 +848,7 @@ spec:
 ---
 # Source: Contrail/charts/control/templates/control.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-controller-control
@@ -856,6 +856,10 @@ metadata:
   labels:
     app: contrail-controller-control
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-controller-control
   template:
     metadata:
       labels:
@@ -873,8 +877,13 @@ spec:
       initContainers:
       - name: contrail-k8s-init
         image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
-        command: ["/contrail-k8s-init"]
+        command: ["/contrail-k8s-init","contrail-controller-control"]
         imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -1010,7 +1019,7 @@ spec:
 ---
 # Source: Contrail/charts/webui/templates/webui.yaml
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-controller-webui
@@ -1127,7 +1136,7 @@ metadata:
 data:
   K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-kube-manager

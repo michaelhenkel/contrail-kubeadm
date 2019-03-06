@@ -14,7 +14,7 @@ data:
   CASSANDRA_STORAGE_PORT: "7000"
   CASSANDRA_JMX_LOCAL_PORT: "7199"
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-cassandra

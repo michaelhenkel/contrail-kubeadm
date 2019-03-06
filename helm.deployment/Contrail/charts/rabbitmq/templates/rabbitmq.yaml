@@ -7,7 +7,7 @@ metadata:
 data:
   RABBITMQ_ERLANG_COOKIE: "47EFF3BB-4786-46E0-A5BB-58455B3C2CB4"
 ---
-apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contrail-rabbitmq
