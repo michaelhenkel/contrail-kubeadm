@@ -240,6 +240,11 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
         envFrom:
         - configMapRef:
             name: rabbitmq-config
