@@ -28,7 +28,7 @@ spec:
       initContainers:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
-        command: ["/contrail-k8s-init","contrail-kafka"]
+        command: ["/contrail-k8s-init2","contrail-kafka"]
         imagePullPolicy: "IfNotPresent"
         env:
         - name: MY_POD_NAME
