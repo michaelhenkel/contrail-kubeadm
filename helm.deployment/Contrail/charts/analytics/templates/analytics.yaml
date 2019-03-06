@@ -1,0 +1,218 @@
+---
+apps/v1
+kind: Deployment
+metadata:
+  name: contrail-analytics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: contrail-analytics
+spec:
+  replicas: {{ .Values.global.replicas }}
+  selector:
+    matchLabels:
+      app: contrail-analytics
+  template:
+    metadata:
+      labels:
+        app: contrail-analytics
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoExecute
+      hostNetwork: true
+      serviceAccountName: contrail-service-account
+      initContainers:
+      - name: contrail-k8s-init
+        image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
+        command: ["/contrail-k8s-init","contrail-analytics"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      - name: wait-for-api
+        image: busybox
+        command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
+        env:
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      - name: contrail-node-init
+        image: "{{ .Values.global.containerRegistry }}/contrail-node-init:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ .Values.global.containerRegistry }}/contrail-status:{{ .Values.global.containerTag }}"
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+      containers:
+      - name: api
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-api:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+      - name: collector
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-collector:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+      - name: alarm-gen
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-alarm-gen:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+      - name: query-engine
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-query-engine:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+      - name: snmp-collector
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-snmp-collector:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+      - name: topology
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-snmp-topology:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+      - name: nodemgr
+        image: "{{ .Values.global.containerRegistry }}/contrail-nodemgr:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+        - configMapRef:
+            name: contrail-config-map
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_NODES
+          valueFrom:
+            configMapKeyRef:
+              name: contrailcontrollernodesv1
+              key: CONTROLLER_NODES
+        - name: NODE_TYPE
+          value: analytics
+        - name: DOCKER_HOST
+          value: "unix://mnt/docker.sock"
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+        - mountPath: /mnt
+          name: docker-unix-socket
+      volumes:
+      - name: analytics-logs
+        hostPath:
+          path: /var/log/contrail/analytics
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin

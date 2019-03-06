@@ -25,7 +25,7 @@ spec:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
         command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -41,7 +41,7 @@ spec:
               fieldPath: metadata.name
       - name: contrail-node-init
         image: "{{ .Values.global.containerRegistry }}/contrail-node-init:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -60,7 +60,7 @@ spec:
       containers:
       - name: api
         image: "{{ .Values.global.containerRegistry }}/contrail-analytics-api:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -79,7 +79,7 @@ spec:
           name: analytics-logs
       - name: collector
         image: "{{ .Values.global.containerRegistry }}/contrail-analytics-collector:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -98,7 +98,7 @@ spec:
           name: analytics-logs
       - name: alarm-gen
         image: "{{ .Values.global.containerRegistry }}/contrail-analytics-alarm-gen:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -117,7 +117,7 @@ spec:
           name: analytics-logs
       - name: query-engine
         image: "{{ .Values.global.containerRegistry }}/contrail-analytics-query-engine:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -136,7 +136,7 @@ spec:
           name: analytics-logs
       - name: snmp-collector
         image: "{{ .Values.global.containerRegistry }}/contrail-analytics-snmp-collector:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -154,8 +154,8 @@ spec:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: topology
-        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-topology:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        image: "{{ .Values.global.containerRegistry }}/contrail-analytics-snmp-topology:{{ .Values.global.containerTag }}"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -174,7 +174,7 @@ spec:
           name: analytics-logs
       - name: nodemgr
         image: "{{ .Values.global.containerRegistry }}/contrail-nodemgr:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map

@@ -25,7 +25,7 @@ spec:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
         command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]

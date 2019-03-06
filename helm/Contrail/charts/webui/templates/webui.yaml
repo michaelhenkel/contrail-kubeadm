@@ -27,7 +27,7 @@ spec:
         command: ["/contrail-k8s-init"]
       - name: contrail-node-init
         image: "{{ .Values.global.containerRegistry }}/contrail-node-init:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -43,7 +43,7 @@ spec:
       containers:
       - name: job
         image: "{{ .Values.global.containerRegistry }}/contrail-controller-webui-job:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -62,7 +62,7 @@ spec:
           name: webui-logs
       - name: web
         image: "{{ .Values.global.containerRegistry }}/contrail-controller-webui-web:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map

@@ -30,10 +30,10 @@ spec:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
         command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
       - name: contrail-node-init
         image: "{{ .Values.global.containerRegistry}}/contrail-node-init:{{ .Values.global.containerTag }}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -51,7 +51,7 @@ spec:
           name: host-usr-bin
       - name: contrail-vrouter-kernel-init
         image: "{{.Values.global.containerRegistry}}/contrail-vrouter-kernel-init:{{.Values.global.containerTag}}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -83,7 +83,7 @@ spec:
           name: host-bin
       - name: contrail-vrouter-nic-init
         image: "{{.Values.global.containerRegistry}}/contrail-vrouter-nic-init:{{.Values.global.containerTag}}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -128,7 +128,7 @@ spec:
               key: CONTROLLER_NODES
       - name: contrail-kubernetes-cni-init
         image: "{{.Values.global.containerRegistry}}/contrail-kubernetes-cni-init:{{.Values.global.containerTag}}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -156,7 +156,7 @@ spec:
       containers:
       - name: contrail-vrouter-agent
         image: "{{.Values.global.containerRegistry}}/contrail-vrouter-agent:{{.Values.global.containerTag}}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -197,7 +197,7 @@ spec:
           name: pod-secret
       - name: nodemgr
         image: "{{.Values.global.containerRegistry}}/contrail-nodemgr:{{.Values.global.containerTag}}"
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map

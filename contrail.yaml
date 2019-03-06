@@ -27,7 +27,7 @@ data:
   ZOOKEEPER_ANALYTICS_PORT: "2181"
   CLOUD_ORCHESTRATOR: "kubernetes"
   CONTRAIL_CONTAINER_REGISTRY: docker.io/michaelhenkel
-  CONTRAIL_CONTAINER_TAG: 5.1-dev5
+  CONTRAIL_CONTAINER_TAG: 5.1.1-dev1
   KUBERNETES_IP_FABRIC_FORWARDING: "true"
   KUBERNETES_IP_FABRIC_SNAT: "true"
   CONTAINER_SCHEDULER: k8s
@@ -81,18 +81,22 @@ data:
   CASSANDRA_STORAGE_PORT: "7000"
   CASSANDRA_JMX_LOCAL_PORT: "7199"
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
-  name: cassandra
+  name: contrail-cassandra
   namespace: contrail
   labels:
-    app: cassandra
+    app: contrail-cassandra
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-cassandra
   template:
     metadata:
       labels:
-        app: cassandra
+        app: contrail-cassandra
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ''
@@ -105,16 +109,21 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-cassandra"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
 #      - name: nodemgr
-#        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1-dev5"
-#        imagePullPolicy: "Always"
+#        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev1"
+#        imagePullPolicy: "IfNotPresent"
 #        envFrom:
 #        - configMapRef:
 #            name: contrail-config-map
@@ -128,7 +137,7 @@ spec:
 #        - name: CONTROLLER_NODES
 #          valueFrom:
 #            configMapKeyRef:
-#              name: contrailcontrollernodes
+#              name: contrailcontrollernodesv1
 #              key: CONTROLLER_NODES
 #        volumeMounts:
 #        - mountPath: /var/log/contrail
@@ -136,7 +145,7 @@ spec:
 #        - mountPath: /mnt
 #          name: docker-unix-socket
       - name: cassandra
-        image: "docker.io/michaelhenkel/contrail-external-cassandra:5.1-dev5"
+        image: "docker.io/michaelhenkel/contrail-external-cassandra:5.1.1-dev1"
         imagePullPolicy: ""
         env:
         - name: NODE_TYPE
@@ -144,7 +153,7 @@ spec:
         - name: CASSANDRA_SEEDS
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         envFrom:
         - configMapRef:
@@ -178,18 +187,22 @@ metadata:
 data:
   RABBITMQ_ERLANG_COOKIE: "47EFF3BB-4786-46E0-A5BB-58455B3C2CB4"
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
-  name: rabbitmq
+  name: contrail-rabbitmq
   namespace: contrail
   labels:
-    app: rabbitmq
+    app: contrail-rabbitmq
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-rabbitmq
   template:
     metadata:
       labels:
-        app: rabbitmq
+        app: contrail-rabbitmq
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ''
@@ -202,15 +215,20 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-rabbitmq"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: rabbitmq
-        image: "docker.io/michaelhenkel/contrail-external-rabbitmq:5.1-dev5"
+        image: "docker.io/michaelhenkel/contrail-external-rabbitmq:5.1.1-dev1"
         imagePullPolicy: ""
         env:
         - name: NODE_TYPE
@@ -220,7 +238,7 @@ spec:
         - name: RABBITMQ_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         envFrom:
         - configMapRef:
@@ -240,18 +258,22 @@ spec:
 ---
 # Source: Contrail/charts/zookeeper/templates/zookeeper.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
-  name: zookeeper
+  name: contrail-zookeeper
   namespace: contrail
   labels:
-    app: zookeeper
+    app: contrail-zookeeper
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-zookeeper
   template:
     metadata:
       labels:
-        app: zookeeper
+        app: contrail-zookeeper
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ''
@@ -264,15 +286,20 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-zookeeper"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: zookeeper
-        image: "docker.io/michaelhenkel/contrail-external-zookeeper:5.1-dev5"
+        image: "docker.io/michaelhenkel/contrail-external-zookeeper:5.1.1-dev1"
         imagePullPolicy: ""
         env:
         - name: ZOOKEEPER_PORT
@@ -284,7 +311,7 @@ spec:
         - name: ZOOKEEPER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/lib/zookeeper
@@ -301,18 +328,22 @@ spec:
 ---
 # Source: Contrail/charts/redis/templates/redis.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
-  name: redis
+  name: contrail-redis
   namespace: contrail
   labels:
-    app: redis
+    app: contrail-redis
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-redis
   template:
     metadata:
       labels:
-        app: redis
+        app: contrail-redis
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ''
@@ -325,16 +356,21 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-redis"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: redis
-        image: "docker.io/michaelhenkel/contrail-external-redis:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-external-redis:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -342,7 +378,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/lib/redis
@@ -359,18 +395,22 @@ spec:
 ---
 # Source: Contrail/charts/kafka/templates/kafka.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
-  name: kafka
+  name: contrail-kafka
   namespace: contrail
   labels:
-    app: kafka
+    app: contrail-kafka
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-kafka
   template:
     metadata:
       labels:
-        app: kafka
+        app: contrail-kafka
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ''
@@ -383,15 +423,20 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-kafka"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: kafka
-        image: "docker.io/michaelhenkel/contrail-external-kafka:5.1-dev5"
+        image: "docker.io/michaelhenkel/contrail-external-kafka:5.1.1-dev1"
         imagePullPolicy: ""
         env:
         - name: NODE_TYPE
@@ -401,19 +446,23 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
 ---
 # Source: Contrail/charts/config/templates/config.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
   name: contrail-controller-config
   namespace: contrail
   labels:
     app: contrail-controller-config
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-controller-config
   template:
     metadata:
       labels:
@@ -430,9 +479,14 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-controller-config"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
@@ -448,12 +502,12 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
-        imagePullPolicy: "Always"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev1"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         volumeMounts:
@@ -472,10 +526,10 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-api:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-config-api:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
@@ -491,10 +545,10 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-devicemgr:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-config-devicemgr:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
@@ -510,10 +564,10 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-schema:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-config-schema:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
@@ -529,16 +583,16 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-svcmonitor:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-config-svcmonitor:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -554,7 +608,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -574,14 +628,18 @@ spec:
 ---
 # Source: Contrail/charts/analytics/templates/analytics.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
   name: contrail-analytics
   namespace: contrail
   labels:
     app: contrail-analytics
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-analytics
   template:
     metadata:
       labels:
@@ -598,9 +656,14 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-analytics"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -608,20 +671,20 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev1"
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
@@ -634,8 +697,8 @@ spec:
           name: host-usr-bin
       containers:
       - name: api
-        image: "docker.io/michaelhenkel/contrail-analytics-api:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-analytics-api:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -647,14 +710,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: collector
-        image: "docker.io/michaelhenkel/contrail-analytics-collector:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-analytics-collector:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -666,14 +729,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: alarm-gen
-        image: "docker.io/michaelhenkel/contrail-analytics-alarm-gen:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-analytics-alarm-gen:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -685,14 +748,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: query-engine
-        image: "docker.io/michaelhenkel/contrail-analytics-query-engine:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-analytics-query-engine:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -704,14 +767,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: snmp-collector
-        image: "docker.io/michaelhenkel/contrail-analytics-snmp-collector:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-analytics-snmp-collector:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -723,14 +786,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: topology
-        image: "docker.io/michaelhenkel/contrail-analytics-topology:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-analytics-snmp-topology:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -742,14 +805,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -761,7 +824,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: NODE_TYPE
           value: analytics
@@ -785,8 +848,8 @@ spec:
 ---
 # Source: Contrail/charts/control/templates/control.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
   name: contrail-controller-control
   namespace: contrail
@@ -809,9 +872,9 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
         command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        imagePullPolicy: "IfNotPresent"
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -823,11 +886,11 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -836,7 +899,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev1"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -845,8 +908,8 @@ spec:
           name: host-usr-bin
       containers:
       - name: control
-        image: "docker.io/michaelhenkel/contrail-controller-control-control:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-control-control:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -858,14 +921,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: control-logs
       - name: dns
-        image: "docker.io/michaelhenkel/contrail-controller-control-dns:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-control-dns:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -877,7 +940,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /etc/contrail
@@ -885,8 +948,8 @@ spec:
         - mountPath: /var/log/contrail
           name: control-logs
       - name: named
-        image: "docker.io/michaelhenkel/contrail-controller-control-named:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-control-named:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -894,7 +957,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: MY_POD_NAME
           valueFrom:
@@ -908,8 +971,8 @@ spec:
         - mountPath: /var/log/contrail
           name: control-logs
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -917,7 +980,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: NODE_TYPE
           value: control
@@ -947,14 +1010,18 @@ spec:
 ---
 # Source: Contrail/charts/webui/templates/webui.yaml
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
   name: contrail-controller-webui
   namespace: contrail
   labels:
     app: contrail-controller-webui
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-controller-webui
   template:
     metadata:
       labels:
@@ -971,11 +1038,17 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-controller-webui"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -984,14 +1057,14 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev1"
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
       containers:
       - name: job
-        image: "docker.io/michaelhenkel/contrail-controller-webui-job:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-webui-job:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1003,14 +1076,14 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
           name: webui-logs
       - name: web
-        image: "docker.io/michaelhenkel/contrail-controller-webui-web:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-controller-webui-web:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1022,7 +1095,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -1054,14 +1127,18 @@ metadata:
 data:
   K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apps/v1
+kind: Deployment
 metadata:
   name: contrail-kube-manager
   namespace: contrail
   labels:
     app: contrail-kube-manager
 spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contrail-kube-manager
   template:
     metadata:
       labels:
@@ -1078,9 +1155,14 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-kube-manager"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -1092,11 +1174,11 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -1105,7 +1187,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev1"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1114,8 +1196,8 @@ spec:
           name: host-usr-bin
       containers:
       - name: kube-manager
-        image: "docker.io/michaelhenkel/contrail-kubernetes-kube-manager:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-kubernetes-kube-manager:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1131,17 +1213,17 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: KUBERNETES_API_SERVER
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: KUBERNETES_API_SERVER
         - name: KUBERNETES_API_SECURE_PORT
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: KUBERNETES_API_SECURE_PORT
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -1190,12 +1272,17 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1-dev5
-        command: ["/contrail-k8s-init"]
-        imagePullPolicy: "Always"
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev1
+        command: ["/contrail-k8s-init","contrail-controller-control"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -1204,7 +1291,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1-dev5"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev1"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1212,8 +1299,8 @@ spec:
         - mountPath: /host/usr/bin
           name: host-usr-bin
       - name: contrail-vrouter-kernel-init
-        image: "docker.io/michaelhenkel/contrail-vrouter-kernel-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-vrouter-kernel-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -1227,12 +1314,12 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: CONTROL_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /usr/src
@@ -1244,8 +1331,8 @@ spec:
         - mountPath: /host/bin
           name: host-bin
       - name: contrail-vrouter-nic-init
-        image: "docker.io/michaelhenkel/contrail-vrouter-nic-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-vrouter-nic-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -1259,12 +1346,12 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: CONTROL_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /usr/src
@@ -1286,11 +1373,11 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-kubernetes-cni-init
-        image: "docker.io/michaelhenkel/contrail-kubernetes-cni-init:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-kubernetes-cni-init:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1302,7 +1389,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/lib/contrail
@@ -1317,8 +1404,8 @@ spec:
           name: agent-logs
       containers:
       - name: contrail-vrouter-agent
-        image: "docker.io/michaelhenkel/contrail-vrouter-agent:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-vrouter-agent:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -1332,7 +1419,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         lifecycle:
           preStop:
@@ -1358,8 +1445,8 @@ spec:
         - mountPath: /tmp/serviceaccount
           name: pod-secret
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1-dev5"
-        imagePullPolicy: "Always"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev1"
+        imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1373,7 +1460,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: NODE_TYPE
           value: vrouter
