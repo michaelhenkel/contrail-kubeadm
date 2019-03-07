@@ -5,8 +5,13 @@ Installing OpenContrail on a kubeadm installed Kubernetes cluster
 - Kubernetes cluster installed with kubeadm
 - Kubernetes node names resolvable via DNS or /etc/hosts
 ## Simple installation 
+### 1-node
 ```
-kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubeadm/master/contrail.yaml
+kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubeadm/master/contrail-1-node.yaml
+```
+### 3-node
+```
+kubectl apply -f https://raw.githubusercontent.com/michaelhenkel/contrail-kubeadm/master/contrail-3-node.yaml
 ```
 For a standard installation there is no need for further configuration.    
 Mandatory configuration parameters are derived from the Kubernetes cluster configuration itself.    

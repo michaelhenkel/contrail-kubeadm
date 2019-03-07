@@ -1,12 +1,16 @@
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: contrail-controller-control
   namespace: {{ .Values.global.namespace }}
   labels:
     app: contrail-controller-control
 spec:
+  replicas: {{ .Values.global.replicas }}
+  selector:
+    matchLabels:
+      app: contrail-controller-control
   template:
     metadata:
       labels:
@@ -24,8 +28,13 @@ spec:
       initContainers:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
-        command: ["/contrail-k8s-init"]
+        command: ["/contrail-k8s-init2","contrail-controller-control"]
         imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -37,7 +46,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-node-init
         image: "{{ .Values.global.containerRegistry }}/contrail-node-init:{{ .Values.global.containerTag }}"
@@ -72,7 +81,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -91,7 +100,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /etc/contrail
@@ -108,7 +117,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: MY_POD_NAME
           valueFrom:
@@ -131,7 +140,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: NODE_TYPE
           value: control

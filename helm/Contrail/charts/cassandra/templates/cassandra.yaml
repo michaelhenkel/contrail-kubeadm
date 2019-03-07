@@ -14,18 +14,22 @@ data:
   CASSANDRA_STORAGE_PORT: "7000"
   CASSANDRA_JMX_LOCAL_PORT: "7199"
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: cassandra
+  name: contrail-cassandra
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: cassandra
+    app: contrail-cassandra
 spec:
+  replicas: {{ .Values.global.replicas }}
+  selector:
+    matchLabels:
+      app: contrail-cassandra
   template:
     metadata:
       labels:
-        app: cassandra
+        app: contrail-cassandra
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ''
@@ -39,8 +43,13 @@ spec:
       initContainers:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
-        command: ["/contrail-k8s-init"]
+        command: ["/contrail-k8s-init2","contrail-cassandra"]
         imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
@@ -61,7 +70,7 @@ spec:
 #        - name: CONTROLLER_NODES
 #          valueFrom:
 #            configMapKeyRef:
-#              name: contrailcontrollernodes
+#              name: contrailcontrollernodesv1
 #              key: CONTROLLER_NODES
 #        volumeMounts:
 #        - mountPath: /var/log/contrail
@@ -77,7 +86,7 @@ spec:
         - name: CASSANDRA_SEEDS
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         envFrom:
         - configMapRef:

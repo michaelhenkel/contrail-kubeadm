@@ -16,14 +16,18 @@ metadata:
 data:
   K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: contrail-kube-manager
   namespace: {{ .Values.global.namespace }}
   labels:
     app: contrail-kube-manager
 spec:
+  replicas: {{ .Values.global.replicas }}
+  selector:
+    matchLabels:
+      app: contrail-kube-manager
   template:
     metadata:
       labels:
@@ -41,8 +45,13 @@ spec:
       initContainers:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
-        command: ["/contrail-k8s-init"]
+        command: ["/contrail-k8s-init2","contrail-kube-manager"]
         imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-api
         image: busybox
         command: ["sh","-c","for cn in `echo $CONTROLLER_NODES | tr ',' '\n'`; do until nc $cn 8082 -w 1 > /dev/null 2>&1; do sleep 1;echo waiting for $cn ;done;echo $cn is alive; done"]
@@ -54,7 +63,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-node-init
         image: "{{ .Values.global.containerRegistry }}/contrail-node-init:{{ .Values.global.containerTag }}"
@@ -93,17 +102,17 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: KUBERNETES_API_SERVER
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: KUBERNETES_API_SERVER
         - name: KUBERNETES_API_SECURE_PORT
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: KUBERNETES_API_SECURE_PORT
         volumeMounts:
         - mountPath: /var/log/contrail

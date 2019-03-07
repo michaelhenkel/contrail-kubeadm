@@ -1,5 +1,0 @@
-global:
-  namespace: "contrail"
-  replicas: 3
-  containerRegistry: "docker.io/michaelhenkel"
-  containerTag: "5.1.1-dev1"

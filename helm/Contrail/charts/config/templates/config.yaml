@@ -1,12 +1,16 @@
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: contrail-controller-config
   namespace: {{ .Values.global.namespace }}
   labels:
     app: contrail-controller-config
 spec:
+  replicas: {{ .Values.global.replicas }}
+  selector:
+    matchLabels:
+      app: contrail-controller-config
   template:
     metadata:
       labels:
@@ -24,8 +28,13 @@ spec:
       initContainers:
       - name: contrail-k8s-init
         image: {{ .Values.global.containerRegistry }}/contrail-k8s-init-container:{{ .Values.global.containerTag }}
-        command: ["/contrail-k8s-init"]
+        command: ["/contrail-k8s-init2","contrail-controller-config"]
         imagePullPolicy: "IfNotPresent"
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       - name: wait-for-vhost0
         image: busybox
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
@@ -41,7 +50,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: CONTRAIL_STATUS_IMAGE
           value: "{{ .Values.global.containerRegistry }}/contrail-status:{{ .Values.global.containerTag }}"
@@ -65,7 +74,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         image: "{{ .Values.global.containerRegistry }}/contrail-controller-config-api:{{ .Values.global.containerTag }}"
         imagePullPolicy: "IfNotPresent"
@@ -84,7 +93,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         image: "{{ .Values.global.containerRegistry }}/contrail-controller-config-devicemgr:{{ .Values.global.containerTag }}"
         imagePullPolicy: "IfNotPresent"
@@ -103,7 +112,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         image: "{{ .Values.global.containerRegistry }}/contrail-controller-config-schema:{{ .Values.global.containerTag }}"
         imagePullPolicy: "IfNotPresent"
@@ -122,7 +131,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         image: "{{ .Values.global.containerRegistry }}/contrail-controller-config-svcmonitor:{{ .Values.global.containerTag }}"
         imagePullPolicy: "IfNotPresent"
@@ -147,7 +156,7 @@ spec:
         - name: CONTROLLER_NODES
           valueFrom:
             configMapKeyRef:
-              name: contrailcontrollernodes
+              name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         volumeMounts:
         - mountPath: /var/log/contrail

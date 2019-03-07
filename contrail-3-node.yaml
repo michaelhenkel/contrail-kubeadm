@@ -89,7 +89,7 @@ metadata:
   labels:
     app: contrail-cassandra
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-cassandra
@@ -195,7 +195,7 @@ metadata:
   labels:
     app: contrail-rabbitmq
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-rabbitmq
@@ -271,7 +271,7 @@ metadata:
   labels:
     app: contrail-zookeeper
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-zookeeper
@@ -341,7 +341,7 @@ metadata:
   labels:
     app: contrail-redis
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-redis
@@ -408,7 +408,7 @@ metadata:
   labels:
     app: contrail-controller-config
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-controller-config
@@ -585,7 +585,7 @@ metadata:
   labels:
     app: contrail-analytics
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-analytics
@@ -729,7 +729,7 @@ metadata:
   labels:
     app: contrail-controller-control
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-controller-control
@@ -900,7 +900,7 @@ metadata:
   labels:
     app: contrail-controller-webui
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-controller-webui
@@ -1017,7 +1017,7 @@ metadata:
   labels:
     app: contrail-kube-manager
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: contrail-kube-manager
