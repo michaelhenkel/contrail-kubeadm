@@ -27,7 +27,7 @@ data:
   ZOOKEEPER_ANALYTICS_PORT: "2181"
   CLOUD_ORCHESTRATOR: "kubernetes"
   CONTRAIL_CONTAINER_REGISTRY: docker.io/michaelhenkel
-  CONTRAIL_CONTAINER_TAG: 5.1.1-dev2
+  CONTRAIL_CONTAINER_TAG: 5.1.1-dev3
   KUBERNETES_IP_FABRIC_FORWARDING: "true"
   KUBERNETES_IP_FABRIC_SNAT: "true"
   CONTAINER_SCHEDULER: k8s
@@ -109,7 +109,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-cassandra"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -122,7 +122,7 @@ spec:
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
 #      - name: nodemgr
-#        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev2"
+#        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev3"
 #        imagePullPolicy: "IfNotPresent"
 #        envFrom:
 #        - configMapRef:
@@ -145,7 +145,7 @@ spec:
 #        - mountPath: /mnt
 #          name: docker-unix-socket
       - name: cassandra
-        image: "docker.io/michaelhenkel/contrail-external-cassandra:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-external-cassandra:5.1.1-dev3"
         imagePullPolicy: ""
         env:
         - name: NODE_TYPE
@@ -215,7 +215,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-rabbitmq"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -228,7 +228,7 @@ spec:
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: rabbitmq
-        image: "docker.io/michaelhenkel/contrail-external-rabbitmq:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-external-rabbitmq:5.1.1-dev3"
         imagePullPolicy: ""
         env:
         - name: NODE_TYPE
@@ -291,7 +291,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-zookeeper"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -304,7 +304,7 @@ spec:
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: zookeeper
-        image: "docker.io/michaelhenkel/contrail-external-zookeeper:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-external-zookeeper:5.1.1-dev3"
         imagePullPolicy: ""
         env:
         - name: ZOOKEEPER_PORT
@@ -361,7 +361,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-redis"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -374,7 +374,7 @@ spec:
         command: ["sh","-c","until ifconfig vhost0 > /dev/null 2>&1; do sleep 1;echo waiting for vhost0 ;done;echo vhost0 is alive"]
       containers:
       - name: redis
-        image: "docker.io/michaelhenkel/contrail-external-redis:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-external-redis:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -428,7 +428,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-controller-config"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -454,8 +454,8 @@ spec:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev2"
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev2"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev3"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -477,7 +477,7 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-api:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-config-api:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -496,7 +496,7 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-devicemgr:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-config-devicemgr:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -515,7 +515,7 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-schema:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-config-schema:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
@@ -534,13 +534,13 @@ spec:
             configMapKeyRef:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
-        image: "docker.io/michaelhenkel/contrail-controller-config-svcmonitor:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-config-svcmonitor:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -605,7 +605,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-analytics"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -627,13 +627,13 @@ spec:
             fieldRef:
               fieldPath: metadata.name
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev2"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev3"
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
@@ -646,7 +646,7 @@ spec:
           name: host-usr-bin
       containers:
       - name: api
-        image: "docker.io/michaelhenkel/contrail-analytics-api:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-analytics-api:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -665,7 +665,7 @@ spec:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: collector
-        image: "docker.io/michaelhenkel/contrail-analytics-collector:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-analytics-collector:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -684,7 +684,7 @@ spec:
         - mountPath: /var/log/contrail
           name: analytics-logs
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -749,7 +749,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-controller-control"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -771,7 +771,7 @@ spec:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -781,7 +781,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev2"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev3"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -790,7 +790,7 @@ spec:
           name: host-usr-bin
       containers:
       - name: control
-        image: "docker.io/michaelhenkel/contrail-controller-control-control:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-control-control:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -809,7 +809,7 @@ spec:
         - mountPath: /var/log/contrail
           name: control-logs
       - name: dns
-        image: "docker.io/michaelhenkel/contrail-controller-control-dns:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-control-dns:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -830,7 +830,7 @@ spec:
         - mountPath: /var/log/contrail
           name: control-logs
       - name: named
-        image: "docker.io/michaelhenkel/contrail-controller-control-named:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-control-named:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -853,7 +853,7 @@ spec:
         - mountPath: /var/log/contrail
           name: control-logs
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -920,7 +920,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-controller-webui"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -929,7 +929,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -939,13 +939,13 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev2"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev3"
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
       containers:
       - name: job
-        image: "docker.io/michaelhenkel/contrail-controller-webui-job:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-webui-job:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -964,7 +964,7 @@ spec:
         - mountPath: /var/log/contrail
           name: webui-logs
       - name: web
-        image: "docker.io/michaelhenkel/contrail-controller-webui-web:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-controller-webui-web:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -1037,7 +1037,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-kube-manager"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -1059,7 +1059,7 @@ spec:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -1069,7 +1069,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev2"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev3"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1078,7 +1078,7 @@ spec:
           name: host-usr-bin
       containers:
       - name: kube-manager
-        image: "docker.io/michaelhenkel/contrail-kubernetes-kube-manager:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-kubernetes-kube-manager:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -1154,7 +1154,7 @@ spec:
       serviceAccountName: contrail-service-account
       initContainers:
       - name: contrail-k8s-init
-        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev2
+        image: docker.io/michaelhenkel/contrail-k8s-init-container:5.1.1-dev3
         command: ["/contrail-k8s-init2","contrail-controller-control"]
         imagePullPolicy: "IfNotPresent"
         env:
@@ -1163,7 +1163,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
       - name: contrail-node-init
-        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-node-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -1173,7 +1173,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONTRAIL_STATUS_IMAGE
-          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev2"
+          value: "docker.io/michaelhenkel/contrail-status:5.1.1-dev3"
         envFrom:
         - configMapRef:
             name: contrail-config-map
@@ -1181,7 +1181,7 @@ spec:
         - mountPath: /host/usr/bin
           name: host-usr-bin
       - name: contrail-vrouter-kernel-init
-        image: "docker.io/michaelhenkel/contrail-vrouter-kernel-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-vrouter-kernel-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -1213,7 +1213,7 @@ spec:
         - mountPath: /host/bin
           name: host-bin
       - name: contrail-vrouter-nic-init
-        image: "docker.io/michaelhenkel/contrail-vrouter-nic-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-vrouter-nic-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -1258,7 +1258,7 @@ spec:
               name: contrailcontrollernodesv1
               key: CONTROLLER_NODES
       - name: contrail-kubernetes-cni-init
-        image: "docker.io/michaelhenkel/contrail-kubernetes-cni-init:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-kubernetes-cni-init:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
@@ -1286,7 +1286,7 @@ spec:
           name: agent-logs
       containers:
       - name: contrail-vrouter-agent
-        image: "docker.io/michaelhenkel/contrail-vrouter-agent:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-vrouter-agent:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
@@ -1327,7 +1327,7 @@ spec:
         - mountPath: /tmp/serviceaccount
           name: pod-secret
       - name: nodemgr
-        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev2"
+        image: "docker.io/michaelhenkel/contrail-nodemgr:5.1.1-dev3"
         imagePullPolicy: "IfNotPresent"
         envFrom:
         - configMapRef:
